@@ -1,20 +1,4 @@
-# services:
-#   mongodb:
-#     image: mongo:6.0
-#     container_name: nest_mongo
-#     ports:
-#       - '27017:27017'
-#     environment:
-#       MONGO_INITDB_ROOT_USERNAME: root
-#       MONGO_INITDB_ROOT_PASSWORD: example
-#     volumes:
-#       - mongo_data:/data/db
-
-# volumes:
-  # mongo_data:
-
-
-version: "3.9"
+version: '3.9'
 
 services:
   mongo:
@@ -25,11 +9,11 @@ services:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: example
     ports:
-      - "27017:27017"
+      - '27017:27017'
     volumes:
       - mongo_data:/data/db
     healthcheck:
-      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      test: ['CMD', 'mongosh', '--eval', "db.adminCommand('ping')"]
       interval: 10s
       timeout: 5s
       retries: 10
@@ -47,7 +31,7 @@ services:
       # Use the service name "mongo" as hostname inside the compose network
       MONGO_URI: mongodb://root:example@mongo:27017/?authSource=admin
     ports:
-      - "3000:3000"
+      - '3000:3000'
     depends_on:
       mongo:
         condition: service_healthy
