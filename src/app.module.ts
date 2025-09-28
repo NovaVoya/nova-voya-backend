@@ -23,6 +23,10 @@ import {
   ServiceCategorySchema,
 } from './dal/schemas/serviceCategory.schema';
 import { MainController } from './api/main.controller';
+import {
+  BookRequest,
+  BookRequestSchema,
+} from './dal/schemas/bookRequests.schema';
 
 @Module({
   imports: [
@@ -33,6 +37,7 @@ import { MainController } from './api/main.controller';
       { name: Provider.name, schema: ProviderSchema },
       { name: Service.name, schema: ServiceSchema },
       { name: ServiceCategory.name, schema: ServiceCategorySchema },
+      { name: BookRequest.name, schema: BookRequestSchema },
     ]),
   ],
   controllers: [

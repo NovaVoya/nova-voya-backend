@@ -1,10 +1,16 @@
-import { Controller, Get, Param, Query } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
 import ServiceService from 'src/bll/services/service';
 import { Response } from 'src/types/response';
 import ProviderService from 'src/bll/services/provider';
 import ServiceCategoryService from 'src/bll/services/serviceCategory';
 import { IService } from 'src/bll/interfaces/services/service/types';
 import { IProvider } from 'src/bll/interfaces/services/provider/types';
+import { InjectModel } from '@nestjs/mongoose';
+import {
+  BookRequest,
+  BookRequestDocument,
+} from 'src/dal/schemas/bookRequests.schema';
+import { Model } from 'mongoose';
 
 @Controller('main')
 export class MainController {
@@ -12,6 +18,8 @@ export class MainController {
     private readonly serviceService: ServiceService,
     private readonly providerService: ProviderService,
     private readonly serviceCategoryService: ServiceCategoryService,
+    @InjectModel(BookRequest.name)
+    private bookRequestModel: Model<BookRequestDocument>,
   ) {}
 
   @Get()
@@ -93,11 +101,13 @@ export class MainController {
   @Get('services')
   async getServices(
     @Query('keyword') keyword: string,
+    @Query('sort') sort: string,
+    @Query('filter') filter: string,
   ): Promise<Response<(IService & { providerName: string })[]>> {
     const services = await this.serviceService.getServices(keyword);
     const providers = await this.providerService.getProviders();
 
-    const data: ((IService & { providerName: string }) | undefined)[] = services
+    let data: ((IService & { providerName: string }) | undefined)[] = services
       .filter((i) => i.provider)
       .map((service) => {
         const provider = providers.find(
@@ -111,6 +121,28 @@ export class MainController {
           providerName: provider.name,
         };
       });
+
+    if (filter && filter === 'has_discount') {
+      data = data.filter((i) => i !== undefined).filter((i) => i.discount);
+    }
+
+    if (filter && filter === 'is_package') {
+      data = data
+        .filter((i) => i !== undefined)
+        .filter((i) => i.packageHighlights.length);
+    }
+
+    console.log(filter, sort);
+
+    if (sort && sort === 'price:asc') {
+      data = data
+        .filter((i) => i !== undefined)
+        .sort((a, b) => parseFloat(a.price) - parseFloat(b.price));
+    } else if (sort && sort === 'price:desc') {
+      data = data
+        .filter((i) => i !== undefined)
+        .sort((a, b) => parseFloat(b.price) - parseFloat(a.price));
+    }
 
     return {
       data: data.filter((i) => i !== undefined),
@@ -263,6 +295,73 @@ export class MainController {
     return {
       data: providers,
       message: 'Providers fetched successfully',
+      success: true,
+    };
+  }
+
+  @Post('book')
+  async bookRequest(
+    @Body()
+    bookRequestDto: {
+      providerId: string;
+      serviceId: string;
+      name: string;
+      email: string;
+      phoneNumber: string;
+      description: string;
+    },
+  ): Promise<Response<{ message: string }>> {
+    const services = await this.serviceService.getServices();
+    const providers = await this.providerService.getProviders();
+
+    if (!services || !providers) {
+      return {
+        data: { message: '' },
+        message: 'No services or providers found',
+        success: false,
+      };
+    }
+
+    if (!services.length || !providers.length) {
+      return {
+        data: { message: '' },
+        message: 'No services or providers found',
+        success: false,
+      };
+    }
+
+    const service = services.find(
+      (i) => i.id.toString() === bookRequestDto.serviceId,
+    );
+    const provider = providers.find(
+      (i) => i.id.toString() === bookRequestDto.providerId,
+    );
+
+    if (!service || !provider) {
+      return {
+        data: { message: '' },
+        message: 'Invalid provider or service id',
+        success: false,
+      };
+    }
+
+    const createdBookRequest = await this.bookRequestModel.create({
+      ...bookRequestDto,
+      service: service.id,
+      provider: provider.id,
+    });
+
+    if (!createdBookRequest) {
+      return {
+        data: { message: '' },
+        message: 'Book request created successfully',
+        success: false,
+      };
+    }
+
+    return {
+      data: { message: '' },
+      message: 'Book request created successfully',
       success: true,
     };
   }

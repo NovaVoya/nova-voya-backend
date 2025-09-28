@@ -16,11 +16,50 @@ export class Service {
   @Prop({ required: true })
   price: string;
 
+  @Prop({ required: false })
+  discount: string;
+
+  @Prop({ required: false })
+  validDiscountDate: Date;
+
+  @Prop({ required: true })
+  rate: number;
+
   @Prop({ required: true })
   recommended: boolean;
 
   @Prop({ required: true })
   cancellation: boolean;
+
+  @Prop({ required: true })
+  consultation: string;
+
+  @Prop({ required: true })
+  duration: string;
+
+  @Prop({ required: true })
+  location: string;
+
+  @Prop({ default: [] })
+  packageHighlights: string[];
+
+  @Prop({ required: true })
+  clinicInformation: string;
+
+  @Prop({ default: [] })
+  highlights: string[];
+
+  @Prop({ required: true })
+  howItWorks: string;
+
+  @Prop({ default: [] })
+  included: string[];
+
+  @Prop({ default: [] })
+  excluded: string[];
+
+  @Prop({ default: [] })
+  expectedOutcome: string[];
 
   @Prop({
     type: [{ type: Types.ObjectId, ref: ServiceCategory.name }],
@@ -36,10 +75,19 @@ export class Service {
   provider: Types.ObjectId;
 
   @Prop({ default: [] })
-  tags: string[];
+  faqPackage: {
+    title: string;
+    description: string;
+  }[];
 
   @Prop({ default: [] })
-  faq: {
+  faqProvider: {
+    title: string;
+    description: string;
+  }[];
+
+  @Prop({ default: [] })
+  faqProcudures: {
     title: string;
     description: string;
   }[];
