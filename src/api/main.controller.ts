@@ -103,6 +103,8 @@ export class MainController {
     @Query('keyword') keyword: string,
     @Query('sort') sort: string,
     @Query('filter') filter: string,
+    @Query('minPrice') minPrice?: string,
+    @Query('maxPrice') maxPrice?: string,
   ): Promise<Response<(IService & { providerName: string })[]>> {
     const services = await this.serviceService.getServices(keyword);
     const providers = await this.providerService.getProviders();
@@ -130,6 +132,21 @@ export class MainController {
       data = data
         .filter((i) => i !== undefined)
         .filter((i) => i.packageHighlights.length);
+    }
+
+    // Price range filter
+    if (minPrice || maxPrice) {
+      data = data.filter((i) => {
+        if (i === undefined) return false;
+
+        const price = parseFloat(i.price);
+        if (isNaN(price)) return false;
+
+        const min = minPrice ? parseFloat(minPrice) : 0;
+        const max = maxPrice ? parseFloat(maxPrice) : Infinity;
+
+        return price >= min && price <= max;
+      });
     }
 
     console.log(filter, sort);
