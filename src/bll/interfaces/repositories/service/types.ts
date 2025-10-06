@@ -7,6 +7,7 @@ export interface ICreateService {
   discount: string;
   validDiscountDate: Date;
   rate: number;
+  reviewsCount: number;
   recommended: boolean;
   cancellation: boolean;
   consultation: string;
@@ -20,10 +21,6 @@ export interface ICreateService {
   excluded: string[];
   expectedOutcome: string[];
   faqPackage: {
-    title: string;
-    description: string;
-  }[];
-  faqProvider: {
     title: string;
     description: string;
   }[];
@@ -44,6 +41,7 @@ export interface IUpdateService {
   discount?: string;
   validDiscountDate?: Date;
   rate?: number;
+  reviewsCount?: number;
   recommended?: boolean;
   cancellation?: boolean;
   consultation?: string;
@@ -57,10 +55,6 @@ export interface IUpdateService {
   excluded?: string[];
   expectedOutcome?: string[];
   faqPackage?: {
-    title: string;
-    description: string;
-  }[];
-  faqProvider?: {
     title: string;
     description: string;
   }[];
@@ -82,6 +76,7 @@ export interface IService {
   discount: string;
   validDiscountDate: Date;
   rate: number;
+  reviewsCount: number;
   recommended: boolean;
   cancellation: boolean;
   consultation: string;
@@ -95,10 +90,6 @@ export interface IService {
   excluded: string[];
   expectedOutcome: string[];
   faqPackage: {
-    title: string;
-    description: string;
-  }[];
-  faqProvider: {
     title: string;
     description: string;
   }[];

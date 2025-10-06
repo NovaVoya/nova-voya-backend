@@ -27,6 +27,10 @@ import {
   BookRequest,
   BookRequestSchema,
 } from './dal/schemas/bookRequests.schema';
+import {
+  ProviderReviews,
+  ProviderReviewsSchema,
+} from './dal/schemas/providerReviews.schema';
 
 @Module({
   imports: [
@@ -38,6 +42,7 @@ import {
       { name: Service.name, schema: ServiceSchema },
       { name: ServiceCategory.name, schema: ServiceCategorySchema },
       { name: BookRequest.name, schema: BookRequestSchema },
+      { name: ProviderReviews.name, schema: ProviderReviewsSchema },
     ]),
   ],
   controllers: [

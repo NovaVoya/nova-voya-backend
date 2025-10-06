@@ -6,32 +6,7 @@
  */
 
 import mongoose, { Schema, Types } from 'mongoose';
-
-const MONGODB_URI =
-  process.env.MONGODB_URI ??
-  'mongodb://root:example@localhost:27017/?authSource=admin';
-
-/* =========================
-   Known IDs from your data
-   ========================= */
-const PROVIDERS: Types.ObjectId[] = [
-  '68a890bfa3ed228516130d26',
-  '68a890f8a3ed228516130d28',
-  '68a8910ca3ed228516130d2a',
-  '68a8914ea3ed228516130d2c',
-  '68a89161a3ed228516130d2e',
-  '68a89179a3ed228516130d30',
-].map((id) => new Types.ObjectId(id));
-
-const CATEGORIES: Types.ObjectId[] = [
-  '68a88ab32c641a7f223012d9',
-  '68a88abf2c641a7f223012db',
-  '68a88ac32c641a7f223012dd',
-  '68a88afb2c641a7f223012e2',
-  '68a88b082c641a7f223012e5',
-  '68a88b112c641a7f223012e7',
-  '68a88b132c641a7f223012e9',
-].map((id) => new Types.ObjectId(id));
+import { CATEGORIES, MONGODB_URI, PROVIDERS } from './CONSTANTS';
 
 /* =========================
    TS Interface for documents
@@ -154,10 +129,17 @@ const SERVICES: Service[] = [
     packageHighlights: [
       'Same-day results summary',
       'Diet & lifestyle guidance',
+      'Personalized risk scoring',
+      'Doctor-reviewed report with action plan',
     ],
     clinicInformation:
       'ISO-certified laboratory, experienced clinicians, and modern imaging facilities.',
-    highlights: ['Fasting required', 'Report in 24–48h'],
+    highlights: [
+      'Fasting required',
+      'Report in 24–48h',
+      'Free portal access to results',
+      'Complimentary BP & BMI check',
+    ],
     howItWorks:
       'Book a slot, arrive fasting for 8–10 hours, complete tests, get results and consult.',
     included: [
@@ -166,11 +148,17 @@ const SERVICES: Service[] = [
       'Liver & kidney function tests',
       'ECG',
       'Chest X-ray (if indicated)',
+      'Thyroid profile (TSH)',
     ],
-    excluded: ['Medications', 'Follow-up imaging beyond package'],
+    excluded: [
+      'Medications',
+      'Follow-up imaging beyond package',
+      'Specialist referrals',
+    ],
     expectedOutcome: [
       'Baseline health assessment',
       'Personalized risk stratification',
+      'Preventive recommendations',
     ],
     categories: pickMany(CATEGORIES, 2),
     provider: pick(PROVIDERS),
@@ -179,14 +167,34 @@ const SERVICES: Service[] = [
         title: 'Do I need to fast?',
         description: 'Yes, 8–10 hours fasting is recommended.',
       },
+      {
+        title: 'Can I take my morning medications?',
+        description:
+          'Take essential meds with small sips of water unless told otherwise.',
+      },
+      {
+        title: 'Will I get a hard copy?',
+        description:
+          'Digital report is standard; printed copy available on request.',
+      },
     ],
     faqProvider: [
       { title: 'Is the lab accredited?', description: 'ISO 15189 accredited.' },
+      {
+        title: 'Who interprets the results?',
+        description:
+          'A licensed physician reviews your results and explains the plan.',
+      },
     ],
     faqProcudures: [
       {
         title: 'How long does it take?',
         description: 'Approximately 2.5 hours end-to-end.',
+      },
+      {
+        title: 'What if an abnormality is found?',
+        description:
+          'You’ll receive guidance and referrals for follow-up as needed.',
       },
     ],
     thumbnail: 'https://picsum.photos/id/1011/800/500',
@@ -208,10 +216,18 @@ const SERVICES: Service[] = [
     consultation: 'Initial oral exam included',
     duration: '45m',
     location: 'Dental suite',
-    packageHighlights: ['Gentle procedure', 'Fluoride finish'],
+    packageHighlights: [
+      'Gentle procedure',
+      'Fluoride finish',
+      'Personalized home-care tips',
+    ],
     clinicInformation:
       'Experienced hygienists with modern ultrasonic scalers and strict infection control.',
-    highlights: ['Minimal downtime', 'Immediate freshness'],
+    highlights: [
+      'Minimal downtime',
+      'Immediate freshness',
+      'Optional desensitizing gel',
+    ],
     howItWorks:
       'Assessment, ultrasonic scaling, polishing, and post-care instructions.',
     included: ['Scaling', 'Polishing', 'Fluoride varnish'],
@@ -224,17 +240,29 @@ const SERVICES: Service[] = [
         title: 'Is it painful?',
         description: 'Usually not; mild sensitivity can occur.',
       },
+      {
+        title: 'How often should I get cleaning?',
+        description: 'Every 6 months, or more frequently if advised.',
+      },
     ],
     faqProvider: [
       {
         title: 'What equipment is used?',
         description: 'Ultrasonic scaler with fine tips.',
       },
+      {
+        title: 'Do you follow sterilization protocols?',
+        description: 'Yes, instruments are autoclaved between every patient.',
+      },
     ],
     faqProcudures: [
       {
         title: 'Any aftercare?',
         description: 'Avoid very cold/hot drinks for a few hours.',
+      },
+      {
+        title: 'Can I eat right after?',
+        description: 'Yes, but skip strongly colored foods for a few hours.',
       },
     ],
     thumbnail: 'https://picsum.photos/id/1027/800/500',
@@ -251,10 +279,18 @@ const SERVICES: Service[] = [
     consultation: 'Radiology consult available on request',
     duration: '1h',
     location: 'Radiology unit',
-    packageHighlights: ['3T MRI', 'Radiologist report in 24h'],
+    packageHighlights: [
+      '3T MRI',
+      'Radiologist report in 24h',
+      'Motion-minimizing cushions',
+    ],
     clinicInformation:
       '3 Tesla scanner, experienced neuroradiologists, patient comfort measures.',
-    highlights: ['Noise-cancelling headphones', 'Anxiolytics available'],
+    highlights: [
+      'Noise-cancelling headphones',
+      'Anxiolytics available',
+      'Metal safety screening',
+    ],
     howItWorks:
       'Screening, positioning, scan sequences, contrast if needed, and report delivery.',
     included: ['MRI sequences', 'Radiologist report'],
@@ -267,14 +303,28 @@ const SERVICES: Service[] = [
         title: 'Is contrast safe?',
         description: 'Yes, with kidney function screening.',
       },
+      {
+        title: 'I’m claustrophobic—what can I do?',
+        description:
+          'We provide reassurance, headphones, and mild anxiolytics if appropriate.',
+      },
     ],
     faqProvider: [
       { title: 'Scanner strength?', description: '3 Tesla high-field MRI.' },
+      {
+        title: 'Do radiologists subspecialize?',
+        description: 'Yes—neuroradiology trained.',
+      },
     ],
     faqProcudures: [
       {
         title: 'Can I bring someone?',
         description: 'Companions wait outside due to magnetic field.',
+      },
+      {
+        title: 'What about implants?',
+        description:
+          'Notify us of any implants; some are MRI-conditional only.',
       },
     ],
     thumbnail: 'https://picsum.photos/id/1040/800/500',
@@ -291,10 +341,18 @@ const SERVICES: Service[] = [
     consultation: '15–20 min video call',
     duration: '20m',
     location: 'Online',
-    packageHighlights: ['Flexible slots', 'E-prescriptions'],
+    packageHighlights: [
+      'Flexible slots',
+      'E-prescriptions',
+      'Secure messaging for 48h',
+    ],
     clinicInformation:
       'Licensed physicians with secure telehealth platform and encrypted records.',
-    highlights: ['No travel required', 'Same-day appointments'],
+    highlights: [
+      'No travel required',
+      'Same-day appointments',
+      'Works on mobile & desktop',
+    ],
     howItWorks:
       'Book a time, join secure link, discuss concerns, receive plan and prescription.',
     included: ['Consultation', 'E-prescription (if suitable)'],
@@ -307,12 +365,26 @@ const SERVICES: Service[] = [
         title: 'What do I need?',
         description: 'Stable internet and a valid ID.',
       },
+      {
+        title: 'Can you treat emergencies?',
+        description:
+          'No—please use in-person urgent/emergency services for emergencies.',
+      },
     ],
     faqProvider: [
       { title: 'Are doctors licensed?', description: 'Yes, board-certified.' },
+      {
+        title: 'Is my data private?',
+        description: 'Your visit is encrypted and stored securely.',
+      },
     ],
     faqProcudures: [
       { title: 'Can I reschedule?', description: 'Yes, up to 2 hours prior.' },
+      {
+        title: 'Will I get a sick note?',
+        description:
+          'Medical certificates provided when clinically appropriate.',
+      },
     ],
     thumbnail: 'https://picsum.photos/id/1062/800/500',
     gallery: ['https://picsum.photos/id/1063/800/500'],
@@ -330,10 +402,18 @@ const SERVICES: Service[] = [
     consultation: 'Initial assessment included',
     duration: '1h',
     location: 'Physiotherapy room',
-    packageHighlights: ['Personalized plan', 'Home exercise program'],
+    packageHighlights: [
+      'Personalized plan',
+      'Home exercise program',
+      'Goal tracking dashboard',
+    ],
     clinicInformation:
       'Certified physiotherapists with manual therapy and sports rehab expertise.',
-    highlights: ['Evidence-based protocols', 'Progress tracking'],
+    highlights: [
+      'Evidence-based protocols',
+      'Progress tracking',
+      'Wear comfortable clothing',
+    ],
     howItWorks:
       'Assessment, goal setting, manual therapy, exercise instruction, and review.',
     included: ['Assessment', 'Therapy session', 'Exercise plan'],
@@ -346,15 +426,29 @@ const SERVICES: Service[] = [
         title: 'What to wear?',
         description: 'Comfortable, flexible clothing.',
       },
+      {
+        title: 'How soon will I feel better?',
+        description:
+          'Some relief can occur after 1–2 sessions; full benefit needs consistency.',
+      },
     ],
     faqProvider: [
       {
         title: 'How many sessions?',
         description: 'Typically 4–8 based on condition.',
       },
+      {
+        title: 'Are therapists licensed?',
+        description: 'Yes, all clinicians are credentialed and insured.',
+      },
     ],
     faqProcudures: [
       { title: 'Any downtime?', description: 'Mild soreness may occur.' },
+      {
+        title: 'Can I exercise afterward?',
+        description:
+          'Light activity is fine; follow your therapist’s guidance.',
+      },
     ],
     thumbnail: 'https://picsum.photos/id/1084/800/500',
     gallery: ['https://picsum.photos/id/1080/800/500'],
@@ -370,10 +464,14 @@ const SERVICES: Service[] = [
     consultation: 'Ob-Gyn review available',
     duration: '40m',
     location: 'Imaging suite',
-    packageHighlights: ['Printed images', 'Optional 3D snapshot'],
+    packageHighlights: [
+      'Printed images',
+      'Optional 3D snapshot',
+      'Partner welcome',
+    ],
     clinicInformation:
       'High-frequency probes, privacy-focused rooms, and experienced sonographers.',
-    highlights: ['Comfortable environment', 'Report in 24h'],
+    highlights: ['Comfortable environment', 'Report in 24h', 'Low wait times'],
     howItWorks:
       'Standard obstetric measurements, Doppler as needed, and report review.',
     included: ['Ultrasound scan', 'Report'],
@@ -385,17 +483,31 @@ const SERVICES: Service[] = [
     provider: pick(PROVIDERS),
     faqPackage: [
       { title: 'Can family join?', description: 'Yes, one companion welcome.' },
+      {
+        title: 'Best time for 3D?',
+        description:
+          'Often between 26–32 weeks, but depends on position and fluid.',
+      },
     ],
     faqProvider: [
       {
         title: 'Is it safe?',
         description: 'Yes, uses sound waves (no radiation).',
       },
+      {
+        title: 'Who performs the scan?',
+        description: 'Registered sonographers with Ob-Gyn oversight.',
+      },
     ],
     faqProcudures: [
       {
         title: 'Need a full bladder?',
         description: 'Early scans may require it; staff will guide.',
+      },
+      {
+        title: 'Can I record the scan?',
+        description:
+          'Short clips allowed where policy permits; ask your sonographer.',
       },
     ],
     thumbnail: 'https://picsum.photos/id/109/800/500',
@@ -412,10 +524,14 @@ const SERVICES: Service[] = [
     consultation: 'Results review optional',
     duration: '20m',
     location: 'Lab draw station',
-    packageHighlights: ['Quick blood draw', 'Report in 48–72h'],
+    packageHighlights: [
+      'Quick blood draw',
+      'Report in 48–72h',
+      'Wide allergen library',
+    ],
     clinicInformation:
       'Automated immunoassay platform with rigorous quality control.',
-    highlights: ['Wide panel coverage'],
+    highlights: ['Wide panel coverage', 'Clear charts in report'],
     howItWorks:
       'Sample collection, lab analysis, and optional physician consultation.',
     included: ['IgE panel', 'Report'],
@@ -425,12 +541,28 @@ const SERVICES: Service[] = [
     provider: pick(PROVIDERS),
     faqPackage: [
       { title: 'Fasting required?', description: 'No fasting needed.' },
+      {
+        title: 'Can medications affect results?',
+        description: 'Certain biologics can; disclose current treatments.',
+      },
     ],
-    faqProvider: [{ title: 'Turnaround time?', description: '48–72 hours.' }],
+    faqProvider: [
+      { title: 'Turnaround time?', description: '48–72 hours.' },
+      {
+        title: 'Do you test for cross-reactivity?',
+        description:
+          'Report flags potential cross-reactive allergens when applicable.',
+      },
+    ],
     faqProcudures: [
       {
         title: 'Any side effects?',
         description: 'Minor bruising at puncture site possible.',
+      },
+      {
+        title: 'Will I need a food challenge?',
+        description:
+          'Sometimes; discuss with your clinician if results are borderline.',
       },
     ],
     thumbnail: 'https://picsum.photos/id/111/800/500',
@@ -447,10 +579,17 @@ const SERVICES: Service[] = [
     consultation: 'Dermatology consult',
     duration: '30m',
     location: 'Dermatology room',
-    packageHighlights: ['Dermatoscopy', 'Personalized regimen'],
+    packageHighlights: [
+      'Dermatoscopy',
+      'Personalized regimen',
+      'UV protection coaching',
+    ],
     clinicInformation:
       'Board-certified dermatologists with dermatoscopes and biopsy support.',
-    highlights: ['Early cancer detection focus'],
+    highlights: [
+      'Early cancer detection focus',
+      'Photo documentation if needed',
+    ],
     howItWorks:
       'History, exam, dermatoscopy, and care plan. Biopsy if needed (extra).',
     included: ['Consultation'],
@@ -463,17 +602,30 @@ const SERVICES: Service[] = [
         title: 'Can I wear makeup?',
         description: 'Preferably avoid on the day.',
       },
+      {
+        title: 'Sun exposure before visit?',
+        description:
+          'Avoid tanning for 1–2 weeks to improve assessment accuracy.',
+      },
     ],
     faqProvider: [
       {
         title: 'Follow-up?',
         description: 'Typically yearly, or sooner if needed.',
       },
+      {
+        title: 'Do you perform mole mapping?',
+        description: 'Available when clinically indicated.',
+      },
     ],
     faqProcudures: [
       {
         title: 'Photos taken?',
         description: 'If required for monitoring with consent.',
+      },
+      {
+        title: 'Will I get prescriptions?',
+        description: 'If appropriate; many treatments start the same day.',
       },
     ],
     thumbnail: 'https://picsum.photos/id/113/800/500',
@@ -490,10 +642,14 @@ const SERVICES: Service[] = [
     consultation: 'Cardiologist review included',
     duration: '1h',
     location: 'Cardiology lab',
-    packageHighlights: ['Immediate interpretation', 'Risk stratification'],
+    packageHighlights: [
+      'Immediate interpretation',
+      'Risk stratification',
+      'Emergency-ready setup',
+    ],
     clinicInformation:
       'Experienced team with emergency preparedness and resuscitation equipment.',
-    highlights: ['Evidence-based protocol (Bruce)'],
+    highlights: ['Evidence-based protocol (Bruce)', 'Real-time monitoring'],
     howItWorks:
       'Resting ECG, treadmill protocol, recovery, and cardiology report.',
     included: ['ECG monitoring', 'Report'],
@@ -506,14 +662,27 @@ const SERVICES: Service[] = [
         title: 'What to wear?',
         description: 'Comfortable athletic attire and shoes.',
       },
+      {
+        title: 'Can I eat beforehand?',
+        description: 'Light meal 2–3 hours prior; avoid caffeine same day.',
+      },
     ],
     faqProvider: [
       { title: 'Any risks?', description: 'Low risk; supervised environment.' },
+      {
+        title: 'Blood pressure control required?',
+        description: 'Yes—uncontrolled hypertension may postpone testing.',
+      },
     ],
     faqProcudures: [
       {
         title: 'Medication pause?',
         description: 'Some meds may be paused—follow doctor advice.',
+      },
+      {
+        title: 'How is the result delivered?',
+        description:
+          'A cardiologist explains findings and next steps immediately.',
       },
     ],
     thumbnail: 'https://picsum.photos/id/115/800/500',
@@ -531,10 +700,14 @@ const SERVICES: Service[] = [
     consultation: 'Dietitian consult',
     duration: '50m',
     location: 'Consultation room / Online',
-    packageHighlights: ['Actionable meal plan', 'Follow-up recommendations'],
+    packageHighlights: [
+      'Actionable meal plan',
+      'Follow-up recommendations',
+      'Shopping list tips',
+    ],
     clinicInformation:
       'Registered dietitians with clinical and sports nutrition backgrounds.',
-    highlights: ['Culturally sensitive plans'],
+    highlights: ['Culturally sensitive plans', 'Works with your budget'],
     howItWorks: 'Dietary recall, goal setting, tailored plan, and resources.',
     included: ['Initial consult', 'Meal plan PDF'],
     excluded: ['Supplements'],
@@ -546,15 +719,27 @@ const SERVICES: Service[] = [
         title: 'Bring labs?',
         description: 'Recent labs help personalize advice.',
       },
+      {
+        title: 'Do you accommodate preferences?',
+        description: 'Yes—vegan, halal, kosher, and allergies accommodated.',
+      },
     ],
     faqProvider: [
       {
         title: 'Insurance coverage?',
         description: 'Varies; check your policy.',
       },
+      {
+        title: 'Who will I see?',
+        description: 'Registered dietitians with relevant subspecialties.',
+      },
     ],
     faqProcudures: [
       { title: 'Follow-ups?', description: 'Typically 2–3 over 3 months.' },
+      {
+        title: 'What if I miss a session?',
+        description: 'Free reschedule if notified 24h in advance.',
+      },
     ],
     thumbnail: 'https://picsum.photos/id/117/800/500',
     gallery: ['https://picsum.photos/id/118/800/500'],
@@ -570,10 +755,14 @@ const SERVICES: Service[] = [
     consultation: 'Optometrist consult',
     duration: '35m',
     location: 'Eye clinic',
-    packageHighlights: ['Prescription update', 'IOP screening'],
+    packageHighlights: [
+      'Prescription update',
+      'IOP screening',
+      'Digital copy of Rx',
+    ],
     clinicInformation:
       'Automated refractors, slit-lamp exam capability, and sterile tonometry tips.',
-    highlights: ['Quick and accurate measurements'],
+    highlights: ['Quick and accurate measurements', 'Glasses & contact advice'],
     howItWorks:
       'Vision charting, autorefract, subjective refraction, and IOP check.',
     included: ['Refraction', 'IOP screening'],
@@ -586,17 +775,30 @@ const SERVICES: Service[] = [
         title: 'Dilation needed?',
         description: 'Not usually; add-on if indicated.',
       },
+      {
+        title: 'Can I wear contacts to the visit?',
+        description:
+          'Yes, but bring your case; you may be asked to remove them.',
+      },
     ],
     faqProvider: [
       {
         title: 'Age limits?',
         description: 'Suitable for adults and older children.',
       },
+      {
+        title: 'Contact lens fitting?',
+        description: 'Available as an add-on service.',
+      },
     ],
     faqProcudures: [
       {
         title: 'Driving after?',
         description: 'Fine unless dilation is performed.',
+      },
+      {
+        title: 'Prescription validity?',
+        description: 'Typically valid for 1–2 years depending on local rules.',
       },
     ],
     thumbnail: 'https://picsum.photos/id/119/800/500',
@@ -613,10 +815,14 @@ const SERVICES: Service[] = [
     consultation: 'Report review optional',
     duration: '15m',
     location: 'Lab draw station',
-    packageHighlights: ['Quick visit', 'Results same-day for CBC'],
+    packageHighlights: [
+      'Quick visit',
+      'Results same-day for CBC',
+      'Digital report & trends',
+    ],
     clinicInformation:
       'Automated analyzers with multi-level controls and rapid reporting.',
-    highlights: ['Reliable and affordable'],
+    highlights: ['Reliable and affordable', 'Minimal wait time'],
     howItWorks: 'Blood draw, lab processing, and results via portal.',
     included: ['CBC', 'CMP', 'Fasting glucose'],
     excluded: ['HbA1c', 'Lipid profile'],
@@ -625,17 +831,30 @@ const SERVICES: Service[] = [
     provider: pick(PROVIDERS),
     faqPackage: [
       { title: 'Fasting?', description: 'Yes, 8 hours for fasting glucose.' },
+      {
+        title: 'Hydration?',
+        description: 'Drink water—being well-hydrated can ease the blood draw.',
+      },
     ],
     faqProvider: [
       {
         title: 'Delivery of results?',
         description: 'Within 24–48h via portal.',
       },
+      {
+        title: 'Quality control?',
+        description: 'Daily calibration and external proficiency testing.',
+      },
     ],
     faqProcudures: [
       {
         title: 'Repeat testing?',
         description: 'As advised by your physician.',
+      },
+      {
+        title: 'Bruising risk?',
+        description:
+          'Minor bruising can occur; apply pressure for 3–5 minutes post draw.',
       },
     ],
     thumbnail: 'https://picsum.photos/id/121/800/500',
@@ -652,10 +871,17 @@ const SERVICES: Service[] = [
     consultation: 'ENT/Audiologist review',
     duration: '30m',
     location: 'Audiology booth',
-    packageHighlights: ['Sound-treated room', 'Calibrated equipment'],
+    packageHighlights: [
+      'Sound-treated room',
+      'Calibrated equipment',
+      'Same-day report',
+    ],
     clinicInformation:
       'Experienced audiologists with ENT support for interpretation.',
-    highlights: ['Quick, objective results'],
+    highlights: [
+      'Quick, objective results',
+      'Comfortable, child-friendly setting',
+    ],
     howItWorks: 'Otoscopy, headphone fitting, threshold testing, and report.',
     included: ['Audiometry test', 'Report'],
     excluded: ['Hearing aids'],
@@ -667,17 +893,31 @@ const SERVICES: Service[] = [
         title: 'Any prep?',
         description: 'Avoid loud noise exposure for 24h before test.',
       },
+      {
+        title: 'Can I test with a cold?',
+        description:
+          'Better to wait until congestion clears for accurate results.',
+      },
     ],
     faqProvider: [
       {
         title: 'Children tested?',
         description: 'Yes, cooperative children can be assessed.',
       },
+      {
+        title: 'Booth safety?',
+        description: 'Fully ventilated and regularly sanitized.',
+      },
     ],
     faqProcudures: [
       {
         title: 'Retest needed?',
         description: 'If results are borderline or symptoms change.',
+      },
+      {
+        title: 'Next steps if abnormal?',
+        description:
+          'We’ll advise ENT referral or further testing as appropriate.',
       },
     ],
     thumbnail: 'https://picsum.photos/id/123/800/500',

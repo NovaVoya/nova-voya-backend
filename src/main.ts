@@ -2,6 +2,8 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import * as express from 'express';
+import { join } from 'path';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -34,6 +36,8 @@ async function bootstrap() {
     jsonDocumentUrl: '/docs-json', // you can GET the raw OpenAPI JSON here
     customSiteTitle: 'My API Docs',
   });
+
+  app.use('/uploads', express.static(join(process.cwd(), 'uploads')));
 
   await app.listen(process.env.PORT ?? 3000);
 }

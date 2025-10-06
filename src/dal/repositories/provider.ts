@@ -37,6 +37,7 @@ export default class ProviderRepository implements IProviderRepository {
       createdAt: (createdProvider as any).createdAt,
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
       updatedAt: (createdProvider as any).updatedAt,
+      faqs: createdProvider.faqs,
     };
   }
   async getProviderById(id: string): Promise<IProvider | null> {
@@ -62,6 +63,7 @@ export default class ProviderRepository implements IProviderRepository {
       createdAt: (provider as any).createdAt,
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
       updatedAt: (provider as any).updatedAt,
+      faqs: provider.faqs,
     };
   }
   async getProviders(): Promise<IProvider[]> {
@@ -88,6 +90,7 @@ export default class ProviderRepository implements IProviderRepository {
         createdAt: (provider as any).createdAt,
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
         updatedAt: (provider as any).updatedAt,
+        faqs: provider.faqs,
       };
     });
   }
@@ -123,6 +126,7 @@ export default class ProviderRepository implements IProviderRepository {
         createdAt: (updatedProvider as any).createdAt,
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
         updatedAt: (updatedProvider as any).updatedAt,
+        faqs: updatedProvider.faqs,
       };
     }
 

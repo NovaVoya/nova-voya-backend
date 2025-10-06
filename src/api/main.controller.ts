@@ -1,6 +1,7 @@
 import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
 import ServiceService from 'src/bll/services/service';
 import { Response } from 'src/types/response';
+import * as crypto from 'crypto';
 import ProviderService from 'src/bll/services/provider';
 import ServiceCategoryService from 'src/bll/services/serviceCategory';
 import { IService } from 'src/bll/interfaces/services/service/types';
@@ -11,6 +12,11 @@ import {
   BookRequestDocument,
 } from 'src/dal/schemas/bookRequests.schema';
 import { Model } from 'mongoose';
+import {
+  ProviderReviews,
+  ProviderReviewsDocument,
+} from 'src/dal/schemas/providerReviews.schema';
+import { Provider } from 'src/dal/schemas/provider.schema';
 
 @Controller('main')
 export class MainController {
@@ -20,6 +26,10 @@ export class MainController {
     private readonly serviceCategoryService: ServiceCategoryService,
     @InjectModel(BookRequest.name)
     private bookRequestModel: Model<BookRequestDocument>,
+    @InjectModel(ProviderReviews.name)
+    private providerReviewsModel: Model<ProviderReviewsDocument>,
+    @InjectModel(Provider.name)
+    private providerModel: Model<Provider>,
   ) {}
 
   @Get()
@@ -103,7 +113,13 @@ export class MainController {
     @Query('keyword') keyword: string,
     @Query('sort') sort: string,
     @Query('filter') filter: string,
-  ): Promise<Response<(IService & { providerName: string })[]>> {
+  ): Promise<
+    Response<
+      (IService & {
+        providerName: string;
+      })[]
+    >
+  > {
     const services = await this.serviceService.getServices(keyword);
     const providers = await this.providerService.getProviders();
 
@@ -132,8 +148,6 @@ export class MainController {
         .filter((i) => i.packageHighlights.length);
     }
 
-    console.log(filter, sort);
-
     if (sort && sort === 'price:asc') {
       data = data
         .filter((i) => i !== undefined)
@@ -157,13 +171,22 @@ export class MainController {
       | (IService & {
           providerName: string;
           providerAbout: string;
+          faqsProvider: {
+            title: string;
+            description: string;
+          }[];
           relatedServices: {
             id: string;
             name: string;
             price: string;
+            provider: string;
             recommended: boolean;
             providerName: string;
             image: string;
+            rate: number;
+            reviewsCount: number;
+            discount: string;
+            validDiscountDate: Date;
           }[];
         })
       | null
@@ -193,11 +216,19 @@ export class MainController {
       };
     }
 
+    await this.providerModel.findOneAndUpdate(
+      { id: provider.id },
+      { $inc: { totalServicesView: 1 } },
+    );
+
     const relatedServices: (
       | (IService & { providerName: string })
       | undefined
     )[] = services
-      .filter((i) => i.provider)
+      .filter(
+        (i) =>
+          i.provider && i.provider.toString() === service.provider.toString(),
+      )
       .map((service) => {
         const provider = providers.find(
           (p) => p.id === service.provider.toString(),
@@ -217,6 +248,7 @@ export class MainController {
         ...service,
         providerName: provider.name,
         providerAbout: provider.description,
+        faqsProvider: provider.faqs,
         relatedServices: relatedServices
           .filter((relatedService) => relatedService !== undefined)
           .filter((rs) => rs.id.toString() !== service.id.toString())
@@ -224,9 +256,14 @@ export class MainController {
             id: i.id.toString(),
             name: i.name,
             price: i.price,
+            discount: i.discount,
             recommended: i.recommended,
             providerName: i.providerName,
             image: i.gallery[0],
+            rate: i.rate,
+            provider: i.provider.toString(),
+            reviewsCount: i.reviewsCount,
+            validDiscountDate: i.validDiscountDate,
           })),
       },
       message: 'Service fetched successfully',
@@ -256,12 +293,33 @@ export class MainController {
       city: string;
       country: string;
       gallery: string[];
+      thumbnail: string;
       createdAt: Date;
       updatedAt: Date;
+      reviews: {
+        name: string;
+        description: string;
+        rate: number;
+        gender: 'male' | 'female';
+        createdAt: Date;
+        updatedAt: Date;
+      }[];
+      bookRequests: {
+        name: string;
+        phoneNumber: string;
+        email: string;
+        description: string;
+        provider: string;
+        service: string;
+      }[];
     } | null>
   > {
     const provider = await this.providerService.getProviderById(id);
     const services = await this.serviceService.getServices();
+
+    const bookRequests = await this.bookRequestModel.find({
+      provider: id,
+    });
 
     if (!provider) {
       return {
@@ -270,6 +328,12 @@ export class MainController {
         success: false,
       };
     }
+    await this.providerReviewsModel.deleteMany({});
+
+    const providerReviews = await this.providerReviewsModel.find({
+      // provider: new Types.ObjectId(id),
+      // displayInWebsite: true,
+    });
 
     const providerServices = services.filter(
       (service) => service.provider.toString() === id,
@@ -282,6 +346,30 @@ export class MainController {
           ...i,
           image: i.gallery[0],
         })),
+        reviews: providerReviews.map((i) => ({
+          ...i,
+          gender: i.gender,
+          description: i.description,
+          name: i.name,
+          rate: i.rate,
+          // @ts-expect-error createdAt is not typed on mongoose doc
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-assignment
+          createdAt: i.createdAt.toISOString(),
+          // @ts-expect-error updatedAt is not typed on mongoose doc
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-assignment
+          updatedAt: i.updatedAt.toISOString(),
+        })),
+        bookRequests: bookRequests.map((i) => ({
+          name: i.name,
+          phoneNumber: i.phoneNumber,
+          email: i.email,
+          description: i.description,
+          provider: i.provider.toString(),
+          service: i.service.toString(),
+          serviceName: services.find(
+            (item) => item.id.toString() === i.service.toString(),
+          )?.name,
+        })),
       },
       message: 'Providers fetched successfully',
       success: true,
@@ -291,7 +379,6 @@ export class MainController {
   @Get('providers')
   async getProviders(): Promise<Response<IProvider[]>> {
     const providers = await this.providerService.getProviders();
-
     return {
       data: providers,
       message: 'Providers fetched successfully',
@@ -362,6 +449,51 @@ export class MainController {
     return {
       data: { message: '' },
       message: 'Book request created successfully',
+      success: true,
+    };
+  }
+
+  @Post('login')
+  async login(
+    @Body()
+    loginDto: {
+      id: string;
+      username: string;
+      password: string;
+    },
+  ) {
+    const provider = await this.providerModel.findById(loginDto.id);
+    if (!provider) {
+      return {
+        data: { message: '' },
+        message: 'Provider not found or invalid credentials',
+        success: false,
+      };
+    }
+
+    if (provider.username !== loginDto.username) {
+      return {
+        data: { message: '' },
+        message: 'Provider not found or invalid credentials',
+        success: false,
+      };
+    }
+
+    if (provider.password !== loginDto.password) {
+      return {
+        data: { message: '' },
+        message: 'Provider not found or invalid credentials',
+        success: false,
+      };
+    }
+
+    // Generate random token with id inside
+    const randomPart = crypto.randomBytes(16).toString('hex');
+    const token = `${randomPart}${loginDto.id}${randomPart}`;
+
+    return {
+      data: { token },
+      message: 'Login successful',
       success: true,
     };
   }

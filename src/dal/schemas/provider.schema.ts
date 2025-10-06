@@ -44,8 +44,23 @@ export class Provider {
   @Prop()
   thumbnail: string;
 
+  @Prop({ required: true, default: 'provider' })
+  username: string;
+
+  @Prop({ required: true, default: '12345678' })
+  password: string;
+
+  @Prop({ required: true, default: 0 })
+  totalServicesView: number;
+
   @Prop()
   gallery: string[];
+
+  @Prop({ default: [] })
+  faqs: {
+    title: string;
+    description: string;
+  }[];
 }
 
 export const ProviderSchema = SchemaFactory.createForClass(Provider);

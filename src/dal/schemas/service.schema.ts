@@ -81,12 +81,6 @@ export class Service {
   }[];
 
   @Prop({ default: [] })
-  faqProvider: {
-    title: string;
-    description: string;
-  }[];
-
-  @Prop({ default: [] })
   faqProcudures: {
     title: string;
     description: string;
@@ -97,6 +91,9 @@ export class Service {
 
   @Prop()
   gallery: string[];
+
+  @Prop({ default: 0 })
+  reviewsCount: number;
 }
 
 export const ServiceSchema = SchemaFactory.createForClass(Service);
