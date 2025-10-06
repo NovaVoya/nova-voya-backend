@@ -36,6 +36,7 @@ export class MainController {
   async get(): Promise<
     Response<{
       providers: {
+        id: string;
         name: string;
         type: string;
         city: string;
@@ -76,6 +77,7 @@ export class MainController {
 
     const data: {
       providers: {
+        id: string;
         name: string;
         type: string;
         city: string;
@@ -112,11 +114,11 @@ export class MainController {
     } = {
       providers: providers.map((i) => {
         return {
+          id: i.id,
           name: i.name,
           type: i.type,
           city: i.city,
           country: i.country,
-          id: i.id,
           image: i.gallery[0],
           isComingSoon: i.isComingSoon,
         };
