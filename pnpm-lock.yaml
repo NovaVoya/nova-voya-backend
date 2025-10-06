@@ -32,6 +32,9 @@ importers:
       class-validator:
         specifier: ^0.14.2
         version: 0.14.2
+      express:
+        specifier: ^5.1.0
+        version: 5.1.0
       moment:
         specifier: ^2.30.1
         version: 2.30.1
