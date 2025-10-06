@@ -35,47 +35,81 @@ export class MainController {
   @Get()
   async get(): Promise<
     Response<{
-      categories: string[];
       providers: {
         name: string;
         type: string;
         city: string;
         country: string;
         image: string;
+        isComingSoon: boolean;
+      }[];
+      recommendedServices: {
+        id: string;
+        name: string;
+        price: string;
+        provider: string;
+        providerName: string;
+        image: string;
+        rate: number;
+        reviewsCount: number;
+        discount: string;
+        validDiscountDate: Date;
+        location: string;
       }[];
       services: {
+        id: string;
         name: string;
-        recommended: boolean;
-        provider: string;
         price: string;
+        provider: string;
+        providerName: string;
         image: string;
+        rate: number;
+        reviewsCount: number;
+        discount: string;
+        validDiscountDate: Date;
+        location: string;
       }[];
     }>
   > {
     const services = await this.serviceService.getServices();
     const providers = await this.providerService.getProviders();
-    const serviceCategories =
-      await this.serviceCategoryService.getServiceCategories();
 
     const data: {
-      categories: string[];
       providers: {
         name: string;
         type: string;
         city: string;
         country: string;
-        id: string;
         image: string;
+        isComingSoon: boolean;
+      }[];
+      recommendedServices: {
+        id: string;
+        name: string;
+        price: string;
+        provider: string;
+        providerName: string;
+        image: string;
+        rate: number;
+        reviewsCount: number;
+        discount: string;
+        validDiscountDate: Date;
+        location: string;
       }[];
       services: {
+        id: string;
         name: string;
-        recommended: boolean;
-        provider: string;
         price: string;
+        provider: string;
+        providerName: string;
         image: string;
+        rate: number;
+        reviewsCount: number;
+        discount: string;
+        validDiscountDate: Date;
+        location: string;
       }[];
     } = {
-      categories: serviceCategories.map((i) => i.name),
       providers: providers.map((i) => {
         return {
           name: i.name,
@@ -84,19 +118,48 @@ export class MainController {
           country: i.country,
           id: i.id,
           image: i.gallery[0],
+          isComingSoon: i.isComingSoon,
         };
       }),
+      recommendedServices: services
+        .filter(
+          (i) =>
+            providers.find((p) => p.id === i.provider.toString()) &&
+            i.recommended,
+        )
+        .map((i) => {
+          return {
+            id: i.id.toString(),
+            name: i.name,
+            providerName: providers.find((p) => p.id === i.provider.toString())!
+              .name,
+            provider: i.provider.toString(),
+            price: i.price,
+            image: i.thumbnail,
+            rate: i.rate,
+            reviewsCount: i.reviewsCount,
+            discount: i.discount,
+            validDiscountDate: i.validDiscountDate,
+            location: i.location,
+          };
+        }),
       services: services
         .filter((i) => providers.find((p) => p.id === i.provider.toString()))
         .map((i) => {
           return {
             id: i.id.toString(),
             name: i.name,
-            recommended: i.recommended,
-            provider: providers.find((p) => p.id === i.provider.toString())!
+            providerName: providers.find((p) => p.id === i.provider.toString())!
               .name,
+            provider: i.provider.toString(),
             price: i.price,
-            image: i.gallery[0],
+            image: i.thumbnail,
+
+            rate: i.rate,
+            reviewsCount: i.reviewsCount,
+            discount: i.discount,
+            validDiscountDate: i.validDiscountDate,
+            location: i.location,
           };
         }),
     };

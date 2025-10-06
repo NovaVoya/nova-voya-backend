@@ -144,13 +144,10 @@ export class ProviderController {
         { name: 'gallery', maxCount: 10 }, // adjust as needed
       ],
       {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-assignment
         storage: diskStorage({
           destination: (req, file, cb) => {
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
             const dir = file.fieldname === 'thumbnail' ? thumbDir : galleryDir;
             ensureDir(dir);
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
             cb(null, dir);
           },
           filename: filenameFactory,
@@ -183,12 +180,16 @@ export class ProviderController {
     const thumbnailPath = files?.thumbnail?.[0]?.path ?? null;
     const galleryPaths = (files?.gallery ?? []).map((f) => f.path);
 
+    const updateObject = {
+      ...data,
+    };
+
+    if (thumbnailPath) updateObject.thumbnail = thumbnailPath;
+    if (galleryPaths) updateObject.gallery = galleryPaths;
+
     // Persist paths with the provider (adjust to your schema)
     const provider = await this.providerService.updateProvider(id, {
-      ...data,
-
-      thumbnail: thumbnailPath!,
-      gallery: galleryPaths,
+      ...updateObject,
     });
 
     if (!provider) {

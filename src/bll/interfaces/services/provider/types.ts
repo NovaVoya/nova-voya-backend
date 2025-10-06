@@ -13,6 +13,7 @@ export interface ICreateProvider {
   overallRate: number;
   thumbnail: string;
   gallery: string[];
+  isComingSoon: boolean;
   faqs: {
     title: string;
     description: string;
@@ -34,6 +35,7 @@ export interface IUpdateProvider {
   overallRate?: number;
   thumbnail?: string;
   gallery?: string[];
+  isComingSoon?: boolean;
   faqs?: {
     title: string;
     description: string;
@@ -58,6 +60,7 @@ export interface IProvider {
   updatedAt: Date;
   thumbnail: string;
   gallery: string[];
+  isComingSoon: boolean;
   faqs: {
     title: string;
     description: string;

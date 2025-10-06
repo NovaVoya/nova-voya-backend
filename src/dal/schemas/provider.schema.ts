@@ -61,6 +61,9 @@ export class Provider {
     title: string;
     description: string;
   }[];
+
+  @Prop({ default: false })
+  isComingSoon: boolean;
 }
 
 export const ProviderSchema = SchemaFactory.createForClass(Provider);
