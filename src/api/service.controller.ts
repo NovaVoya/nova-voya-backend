@@ -188,10 +188,15 @@ export class ServiceController {
     const thumbnailPath = files?.thumbnail?.[0]?.path ?? null;
     const galleryPaths = (files?.gallery ?? []).map((f) => f.path);
 
-    const service = await this.serviceService.updateService(id, {
+    const updateObject = {
       ...data,
-      thumbnail: thumbnailPath!,
-      gallery: galleryPaths,
+    };
+
+    if (thumbnailPath) updateObject.thumbnail = thumbnailPath;
+    if (galleryPaths) updateObject.gallery = galleryPaths;
+
+    const service = await this.serviceService.updateService(id, {
+      ...updateObject,
     });
 
     if (!service) {
