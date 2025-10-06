@@ -46,6 +46,12 @@ export class Provider {
 
   @Prop()
   gallery: string[];
+
+  @Prop({ default: [] })
+  faqProvider: {
+    title: string;
+    description: string;
+  }[];
 }
 
 export const ProviderSchema = SchemaFactory.createForClass(Provider);

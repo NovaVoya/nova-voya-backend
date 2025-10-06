@@ -33,6 +33,7 @@ export default class ProviderRepository implements IProviderRepository {
       overallRate: createdProvider.overallRate,
       thumbnail: createdProvider.thumbnail,
       gallery: createdProvider.gallery,
+      faqProvider: createdProvider.faqProvider,
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment
       createdAt: (createdProvider as any).createdAt,
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
@@ -58,6 +59,7 @@ export default class ProviderRepository implements IProviderRepository {
       overallRate: provider.overallRate,
       thumbnail: provider.thumbnail,
       gallery: provider.gallery,
+      faqProvider: provider.faqProvider,
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment
       createdAt: (provider as any).createdAt,
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
@@ -84,6 +86,7 @@ export default class ProviderRepository implements IProviderRepository {
         overallRate: provider.overallRate,
         thumbnail: provider.thumbnail,
         gallery: provider.gallery,
+        faqProvider: provider.faqProvider,
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment
         createdAt: (provider as any).createdAt,
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
@@ -119,6 +122,7 @@ export default class ProviderRepository implements IProviderRepository {
         overallRate: updatedProvider.overallRate,
         thumbnail: updatedProvider.thumbnail,
         gallery: updatedProvider.gallery,
+        faqProvider: updatedProvider.faqProvider,
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment
         createdAt: (updatedProvider as any).createdAt,
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access

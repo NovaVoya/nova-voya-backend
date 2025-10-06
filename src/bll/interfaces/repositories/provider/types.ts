@@ -13,6 +13,10 @@ export interface ICreateProvider {
   overallRate: number;
   thumbnail: string;
   gallery: string[];
+  faqProvider: {
+    title: string;
+    description: string;
+  }[];
 }
 
 export interface IUpdateProvider {
@@ -30,6 +34,10 @@ export interface IUpdateProvider {
   overallRate?: number;
   thumbnail?: string;
   gallery?: string[];
+  faqProvider?: {
+    title: string;
+    description: string;
+  }[];
 }
 
 export interface IProvider {
@@ -48,6 +56,10 @@ export interface IProvider {
   overallRate: number;
   thumbnail: string;
   gallery: string[];
+  faqProvider: {
+    title: string;
+    description: string;
+  }[];
   createdAt: Date;
   updatedAt: Date;
 }
