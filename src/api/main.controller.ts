@@ -354,6 +354,10 @@ export class MainController {
       }[];
       latitude: number;
       longitude: number;
+      faqs: {
+        title: string;
+        description: string;
+      }[];
       address: string;
       city: string;
       country: string;
@@ -411,6 +415,7 @@ export class MainController {
           ...i,
           image: i.gallery[0],
         })),
+        faqs: provider.faqs,
         reviews: providerReviews.map((i) => ({
           ...i,
           gender: i.gender,
