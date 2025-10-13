@@ -4,6 +4,7 @@ import { Response } from 'src/types/response';
 import * as crypto from 'crypto';
 import ProviderService from 'src/bll/services/provider';
 import ServiceCategoryService from 'src/bll/services/serviceCategory';
+import EmailService from 'src/bll/services/email';
 import { IService } from 'src/bll/interfaces/services/service/types';
 import { IProvider } from 'src/bll/interfaces/services/provider/types';
 import { InjectModel } from '@nestjs/mongoose';
@@ -24,6 +25,7 @@ export class MainController {
     private readonly serviceService: ServiceService,
     private readonly providerService: ProviderService,
     private readonly serviceCategoryService: ServiceCategoryService,
+    private readonly emailService: EmailService,
     @InjectModel(BookRequest.name)
     private bookRequestModel: Model<BookRequestDocument>,
     @InjectModel(ProviderReviews.name)
@@ -566,5 +568,102 @@ export class MainController {
       message: 'Login successful',
       success: true,
     };
+  }
+
+  @Get('send-mail')
+  async sendMail(): Promise<Response<{ message: string }>> {
+    try {
+      const emailOptions = {
+        to: 'soroush.asamiesfahan@gmail.com',
+        subject: 'Test Email from Nova Voya',
+        text: 'This is a test email sent from Nova Voya backend.',
+        html: '<h1>Test Email</h1><p>This is a test email sent from Nova Voya backend.</p>',
+      };
+
+      const result = await this.emailService.sendEmail(emailOptions);
+
+      if (result.success) {
+        return {
+          success: true,
+          message: 'Email sent successfully',
+          data: {
+            message: `Email sent with ID: ${result.messageId || 'unknown'}`,
+          },
+        };
+      } else {
+        return {
+          success: false,
+          message: 'Failed to send email',
+          data: { message: result.error || 'Unknown error occurred' },
+        };
+      }
+    } catch {
+      return {
+        success: false,
+        message: 'Error sending email',
+        data: { message: 'An unexpected error occurred' },
+      };
+    }
+  }
+
+  @Get('send-advanced-mail')
+  async sendAdvancedMail(
+    @Query('to') to: string,
+    @Query('cc') cc?: string,
+    @Query('bcc') bcc?: string,
+    @Query('subject') subject?: string,
+    @Query('text') text?: string,
+    @Query('html') html?: string,
+    @Query('replyTo') replyTo?: string,
+    @Query('fromName') fromName?: string,
+  ): Promise<Response<{ message: string }>> {
+    try {
+      // Validate required parameters
+      if (!to) {
+        return {
+          success: false,
+          message: 'Missing required parameter: to',
+          data: { message: 'The "to" parameter is required' },
+        };
+      }
+
+      const emailOptions = {
+        to,
+        cc,
+        bcc,
+        subject: subject || 'Advanced Email from Nova Voya',
+        text:
+          text || 'This is an advanced test email sent from Nova Voya backend.',
+        html:
+          html ||
+          '<h1>Advanced Test Email</h1><p>This is an advanced test email sent from Nova Voya backend with enhanced features.</p>',
+        replyTo,
+        fromName: fromName || 'Nova Voya Support',
+      };
+
+      const result = await this.emailService.sendAdvancedEmail(emailOptions);
+
+      if (result.success) {
+        return {
+          success: true,
+          message: 'Advanced email sent successfully',
+          data: {
+            message: `Email sent with ID: ${result.messageId || 'unknown'}`,
+          },
+        };
+      } else {
+        return {
+          success: false,
+          message: 'Failed to send advanced email',
+          data: { message: result.error || 'Unknown error occurred' },
+        };
+      }
+    } catch {
+      return {
+        success: false,
+        message: 'Error sending advanced email',
+        data: { message: 'An unexpected error occurred' },
+      };
+    }
   }
 }
