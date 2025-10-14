@@ -73,13 +73,10 @@ export class ProviderController {
         { name: 'gallery', maxCount: 10 }, // adjust as needed
       ],
       {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-assignment
         storage: diskStorage({
           destination: (req, file, cb) => {
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
             const dir = file.fieldname === 'thumbnail' ? thumbDir : galleryDir;
             ensureDir(dir);
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
             cb(null, dir);
           },
           filename: filenameFactory,
@@ -94,8 +91,8 @@ export class ProviderController {
           cb(null, true);
         },
         limits: {
-          fileSize: 5 * 1024 * 1024, // 5MB per file (tweak to your needs)
-          files: 11, // 1 thumb + up to 10 gallery images
+          fileSize: 20 * 1024 * 1024, // ⬆️ 20 MB per file
+          files: 11,
         },
       },
     ),
@@ -162,8 +159,8 @@ export class ProviderController {
           cb(null, true);
         },
         limits: {
-          fileSize: 5 * 1024 * 1024, // 5MB per file (tweak to your needs)
-          files: 11, // 1 thumb + up to 10 gallery images
+          fileSize: 20 * 1024 * 1024, // ⬆️ 20 MB per file
+          files: 11,
         },
       },
     ),

@@ -106,8 +106,8 @@ export class ServiceController {
           cb(null, true);
         },
         limits: {
-          fileSize: 5 * 1024 * 1024, // 5MB per file (tweak to your needs)
-          files: 11, // 1 thumb + up to 10 gallery images
+          fileSize: 20 * 1024 * 1024, // ⬆️ 20 MB per file
+          files: 11,
         },
       },
     ),
@@ -170,8 +170,8 @@ export class ServiceController {
           cb(null, true);
         },
         limits: {
-          fileSize: 5 * 1024 * 1024, // 5MB per file (tweak to your needs)
-          files: 11, // 1 thumb + up to 10 gallery images
+          fileSize: 20 * 1024 * 1024, // ⬆️ 20 MB per file
+          files: 11,
         },
       },
     ),
