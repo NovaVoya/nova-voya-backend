@@ -513,13 +513,49 @@ export class MainController {
     if (!createdBookRequest) {
       return {
         data: { message: '' },
-        message: 'Book request created successfully',
+        message: 'Failed to create book request.',
         success: false,
       };
     }
 
+    const bookData = {
+      short_id: `NV-${new Date().toISOString().slice(0, 10).replace(/-/g, '')}-${new Date().getHours()}-${createdBookRequest.id}`,
+      Deal_title: service.name,
+      provider_name: provider.name,
+      request_date: new Date().toISOString(),
+      name: bookRequestDto.name,
+      email: bookRequestDto.email,
+      phone_e164: bookRequestDto.phoneNumber,
+      message: bookRequestDto.description,
+    };
+
+    // provider email
+    const providerEmailResult = await this.emailService.sendPatientInquiryEmail(
+      provider.email,
+      bookData,
+    );
+
+    // patient email
+    const patientEmailResult = await this.emailService.sendPatientInquiryEmail(
+      bookRequestDto.email,
+      bookData,
+    );
+
+    // patient email
+    const supportingEmailResult =
+      await this.emailService.sendPatientInquiryEmail(
+        process.env.GMAIL_USER || 'soroush@novavoya.com',
+        bookData,
+      );
+
     return {
-      data: { message: '' },
+      data: {
+        message:
+          patientEmailResult.messageId ||
+          providerEmailResult.messageId ||
+          supportingEmailResult.messageId ||
+          'unknown',
+      },
       message: 'Book request created successfully',
       success: true,
     };
@@ -568,102 +604,5 @@ export class MainController {
       message: 'Login successful',
       success: true,
     };
-  }
-
-  @Get('send-mail')
-  async sendMail(): Promise<Response<{ message: string }>> {
-    try {
-      const emailOptions = {
-        to: 'soroush.asamiesfahan@gmail.com',
-        subject: 'Test Email from Nova Voya',
-        text: 'This is a test email sent from Nova Voya backend.',
-        html: '<h1>Test Email</h1><p>This is a test email sent from Nova Voya backend.</p>',
-      };
-
-      const result = await this.emailService.sendEmail(emailOptions);
-
-      if (result.success) {
-        return {
-          success: true,
-          message: 'Email sent successfully',
-          data: {
-            message: `Email sent with ID: ${result.messageId || 'unknown'}`,
-          },
-        };
-      } else {
-        return {
-          success: false,
-          message: 'Failed to send email',
-          data: { message: result.error || 'Unknown error occurred' },
-        };
-      }
-    } catch {
-      return {
-        success: false,
-        message: 'Error sending email',
-        data: { message: 'An unexpected error occurred' },
-      };
-    }
-  }
-
-  @Get('send-advanced-mail')
-  async sendAdvancedMail(
-    @Query('to') to: string,
-    @Query('cc') cc?: string,
-    @Query('bcc') bcc?: string,
-    @Query('subject') subject?: string,
-    @Query('text') text?: string,
-    @Query('html') html?: string,
-    @Query('replyTo') replyTo?: string,
-    @Query('fromName') fromName?: string,
-  ): Promise<Response<{ message: string }>> {
-    try {
-      // Validate required parameters
-      if (!to) {
-        return {
-          success: false,
-          message: 'Missing required parameter: to',
-          data: { message: 'The "to" parameter is required' },
-        };
-      }
-
-      const emailOptions = {
-        to,
-        cc,
-        bcc,
-        subject: subject || 'Advanced Email from Nova Voya',
-        text:
-          text || 'This is an advanced test email sent from Nova Voya backend.',
-        html:
-          html ||
-          '<h1>Advanced Test Email</h1><p>This is an advanced test email sent from Nova Voya backend with enhanced features.</p>',
-        replyTo,
-        fromName: fromName || 'Nova Voya Support',
-      };
-
-      const result = await this.emailService.sendAdvancedEmail(emailOptions);
-
-      if (result.success) {
-        return {
-          success: true,
-          message: 'Advanced email sent successfully',
-          data: {
-            message: `Email sent with ID: ${result.messageId || 'unknown'}`,
-          },
-        };
-      } else {
-        return {
-          success: false,
-          message: 'Failed to send advanced email',
-          data: { message: result.error || 'Unknown error occurred' },
-        };
-      }
-    } catch {
-      return {
-        success: false,
-        message: 'Error sending advanced email',
-        data: { message: 'An unexpected error occurred' },
-      };
-    }
   }
 }
