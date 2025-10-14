@@ -31,6 +31,7 @@ import {
   ProviderReviews,
   ProviderReviewsSchema,
 } from './dal/schemas/providerReviews.schema';
+import EmailService from './bll/services/email';
 
 @Module({
   imports: [
@@ -63,6 +64,7 @@ import {
     ServiceService,
     ServiceCategoryRepository,
     ServiceCategoryService,
+    EmailService,
   ],
 })
 export class AppModule {}

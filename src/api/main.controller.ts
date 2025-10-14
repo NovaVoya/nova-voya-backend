@@ -4,6 +4,7 @@ import { Response } from 'src/types/response';
 import * as crypto from 'crypto';
 import ProviderService from 'src/bll/services/provider';
 import ServiceCategoryService from 'src/bll/services/serviceCategory';
+import EmailService from 'src/bll/services/email';
 import { IService } from 'src/bll/interfaces/services/service/types';
 import { IProvider } from 'src/bll/interfaces/services/provider/types';
 import { InjectModel } from '@nestjs/mongoose';
@@ -24,6 +25,7 @@ export class MainController {
     private readonly serviceService: ServiceService,
     private readonly providerService: ProviderService,
     private readonly serviceCategoryService: ServiceCategoryService,
+    private readonly emailService: EmailService,
     @InjectModel(BookRequest.name)
     private bookRequestModel: Model<BookRequestDocument>,
     @InjectModel(ProviderReviews.name)
@@ -511,13 +513,63 @@ export class MainController {
     if (!createdBookRequest) {
       return {
         data: { message: '' },
-        message: 'Book request created successfully',
+        message: 'Failed to create book request.',
         success: false,
       };
     }
 
+    const bookData = {
+      short_id: `NV-${new Date().toISOString().slice(0, 10).replace(/-/g, '')}-${new Date().getHours()}-${createdBookRequest.id}`,
+      Deal_title: service.name,
+      provider_name: provider.name,
+      request_date: new Date().toISOString(),
+      name: bookRequestDto.name,
+      email: bookRequestDto.email,
+      phone_e164: bookRequestDto.phoneNumber,
+      message: bookRequestDto.description,
+    };
+
+    // provider email
+    let providerEmailResult: { success: boolean; messageId?: string } = {
+      success: false,
+    };
+    if (process.env.IS_ACTIVE_PROVIDER_MAIL === 'true') {
+      providerEmailResult = await this.emailService.sendPatientInquiryEmail(
+        provider.email,
+        bookData,
+      );
+    }
+
+    // patient email
+    let patientEmailResult: { success: boolean; messageId?: string } = {
+      success: false,
+    };
+    if (process.env.IS_ACTIVE_PATIENT_MAIL === 'true') {
+      patientEmailResult = await this.emailService.sendPatientInquiryEmail(
+        bookRequestDto.email,
+        bookData,
+      );
+    }
+
+    // support email
+    let supportingEmailResult: { success: boolean; messageId?: string } = {
+      success: false,
+    };
+    if (process.env.IS_ACTIVE_SUPPORT_MAIL === 'true') {
+      supportingEmailResult = await this.emailService.sendPatientInquiryEmail(
+        process.env.GMAIL_USER || 'mehrdad@novavoya.com',
+        bookData,
+      );
+    }
+
     return {
-      data: { message: '' },
+      data: {
+        message:
+          providerEmailResult.messageId ||
+          patientEmailResult.messageId ||
+          supportingEmailResult.messageId ||
+          'unknown',
+      },
       message: 'Book request created successfully',
       success: true,
     };
