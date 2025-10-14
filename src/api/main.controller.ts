@@ -530,29 +530,43 @@ export class MainController {
     };
 
     // provider email
-    const providerEmailResult = await this.emailService.sendPatientInquiryEmail(
-      provider.email,
-      bookData,
-    );
-
-    // patient email
-    const patientEmailResult = await this.emailService.sendPatientInquiryEmail(
-      bookRequestDto.email,
-      bookData,
-    );
-
-    // patient email
-    const supportingEmailResult =
-      await this.emailService.sendPatientInquiryEmail(
-        process.env.GMAIL_USER || 'soroush@novavoya.com',
+    let providerEmailResult: { success: boolean; messageId?: string } = {
+      success: false,
+    };
+    if (process.env.IS_ACTIVE_PROVIDER_MAIL === 'true') {
+      providerEmailResult = await this.emailService.sendPatientInquiryEmail(
+        provider.email,
         bookData,
       );
+    }
+
+    // patient email
+    let patientEmailResult: { success: boolean; messageId?: string } = {
+      success: false,
+    };
+    if (process.env.IS_ACTIVE_PATIENT_MAIL === 'true') {
+      patientEmailResult = await this.emailService.sendPatientInquiryEmail(
+        bookRequestDto.email,
+        bookData,
+      );
+    }
+
+    // support email
+    let supportingEmailResult: { success: boolean; messageId?: string } = {
+      success: false,
+    };
+    if (process.env.IS_ACTIVE_SUPPORT_MAIL === 'true') {
+      supportingEmailResult = await this.emailService.sendPatientInquiryEmail(
+        process.env.GMAIL_USER || 'mehrdad@novavoya.com',
+        bookData,
+      );
+    }
 
     return {
       data: {
         message:
-          patientEmailResult.messageId ||
           providerEmailResult.messageId ||
+          patientEmailResult.messageId ||
           supportingEmailResult.messageId ||
           'unknown',
       },

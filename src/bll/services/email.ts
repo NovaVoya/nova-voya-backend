@@ -75,8 +75,8 @@ export default class EmailService implements IEmailService {
         port: 587,
         secure: false,
         auth: {
-          user: process.env.GMAIL_USER || 'soroush@novavoya.com',
-          pass: process.env.GMAIL_PASS || 'fxsi kapj vuux sube',
+          user: process.env.GMAIL_USER || 'example@novavoya.com',
+          pass: process.env.GMAIL_PASS || 'xxxxxxxxxxxxxxxx',
         },
         tls: {
           rejectUnauthorized: false,
@@ -85,15 +85,6 @@ export default class EmailService implements IEmailService {
 
       this.transporter = nodemailer.createTransport(config);
       this.isInitialized = true;
-
-      console.log('✅ Email transporter initialized successfully');
-      console.log('📧 Using Gmail SMTP service');
-      console.log(
-        '💡 Make sure you are using Gmail App Password, not regular password',
-      );
-      console.log(
-        '   Generate App Password: https://myaccount.google.com/apppasswords',
-      );
     } catch (error) {
       console.error('❌ Failed to initialize email transporter:', error);
       this.isInitialized = false;
@@ -137,18 +128,12 @@ export default class EmailService implements IEmailService {
           console.error(
             '💡 Authentication Error: You must use Gmail App Password!',
           );
-          console.error(
-            '   Generate App Password: https://myaccount.google.com/apppasswords',
-          );
         } else if (
           emailError.code === 'ESOCKET' ||
           emailError.code === 'ECONNRESET'
         ) {
           console.error(
             '💡 Connection Error: This usually means wrong password or no App Password',
-          );
-          console.error(
-            '   Make sure you are using App Password, not regular Gmail password',
           );
         }
       }
@@ -204,18 +189,12 @@ export default class EmailService implements IEmailService {
           console.error(
             '💡 Authentication Error: You must use Gmail App Password!',
           );
-          console.error(
-            '   Generate App Password: https://myaccount.google.com/apppasswords',
-          );
         } else if (
           emailError.code === 'ESOCKET' ||
           emailError.code === 'ECONNRESET'
         ) {
           console.error(
             '💡 Connection Error: This usually means wrong password or no App Password',
-          );
-          console.error(
-            '   Make sure you are using App Password, not regular Gmail password',
           );
         }
       }
@@ -275,8 +254,7 @@ export default class EmailService implements IEmailService {
       );
 
       // Prepare logo attachment
-      const logoPath = path.join(process.cwd(),
-      'uploads/public/Logo.png');
+      const logoPath = path.join(process.cwd(), 'uploads/public/Logo.png');
       const mailOptions = {
         from: `Nova Voya Support <${
           process.env.GMAIL_USER || 'support@novavoya.com'
@@ -303,7 +281,8 @@ export default class EmailService implements IEmailService {
       console.error('❌ Error sending patient inquiry email:', error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error occurred',
+        error:
+          error instanceof Error ? error.message : 'Unknown error occurred',
       };
     }
   }
