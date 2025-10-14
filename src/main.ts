@@ -9,6 +9,10 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.enableCors();
 
+  // ✅ Increase request body size limits (adjust '50mb' as needed)
+  app.use(express.json({ limit: '50mb' }));
+  app.use(express.urlencoded({ limit: '50mb', extended: true }));
+
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
@@ -22,18 +26,12 @@ async function bootstrap() {
     .setTitle('My API')
     .setDescription('API docs for My Service')
     .setVersion('1.0.0')
-    .addBearerAuth() // shows "Authorize" button for JWT
-    // .addCookieAuth('sid')   // or cookies
-    // .addServer('/v1')       // if you version via path
+    .addBearerAuth()
     .build();
 
-  const document = SwaggerModule.createDocument(app, config, {
-    // include?: [Module1, Module2], // to limit to certain modules
-    // deepScanRoutes: true,         // sometimes needed for lazy-loaded modules
-  });
-
+  const document = SwaggerModule.createDocument(app, config, {});
   SwaggerModule.setup('/docs', app, document, {
-    jsonDocumentUrl: '/docs-json', // you can GET the raw OpenAPI JSON here
+    jsonDocumentUrl: '/docs-json',
     customSiteTitle: 'My API Docs',
   });
 
