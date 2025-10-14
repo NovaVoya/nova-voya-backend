@@ -14,7 +14,6 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 interface TransporterConfig {
-  // service: string;
   host: string;
   port: number;
   secure: boolean;
@@ -64,13 +63,14 @@ export default class EmailService implements IEmailService {
   private isInitialized = false;
 
   constructor() {
+    console.log('📧 Initializing EmailService...');
     this.initializeTransporter();
   }
 
   private initializeTransporter(): void {
     try {
+      console.log('⚙️ Setting up email transporter configuration...');
       const config: TransporterConfig = {
-        // service: 'gmail',
         host: 'smtp.gmail.com',
         port: 587,
         secure: false,
@@ -85,6 +85,7 @@ export default class EmailService implements IEmailService {
 
       this.transporter = nodemailer.createTransport(config);
       this.isInitialized = true;
+      console.log('✅ Email transporter initialized successfully.');
     } catch (error) {
       console.error('❌ Failed to initialize email transporter:', error);
       this.isInitialized = false;
@@ -92,12 +93,12 @@ export default class EmailService implements IEmailService {
   }
 
   async sendEmail(options: ISendEmailOptions): Promise<IEmailResponse> {
+    console.log('📤 Attempting to send email...', options);
+
     try {
       if (!this.isInitialized || !this.transporter) {
-        return {
-          success: false,
-          error: 'Email transporter not initialized',
-        };
+        console.warn('⚠️ Email transporter not initialized.');
+        return { success: false, error: 'Email transporter not initialized' };
       }
 
       const mailOptions: EmailOptions = {
@@ -108,12 +109,12 @@ export default class EmailService implements IEmailService {
         html: options.html,
       };
 
-      const info = await this.transporter.sendMail(mailOptions);
+      console.log('📨 Sending email with options:', mailOptions);
 
-      return {
-        success: true,
-        messageId: info?.messageId || 'unknown',
-      };
+      const info = await this.transporter.sendMail(mailOptions);
+      console.log('✅ Email sent successfully:', info);
+
+      return { success: true, messageId: info?.messageId || 'unknown' };
     } catch (error: unknown) {
       console.error('❌ Error sending email:', error);
 
@@ -123,6 +124,7 @@ export default class EmailService implements IEmailService {
           responseCode?: number;
           message?: string;
         };
+        console.warn('⚠️ Email error details:', emailError);
 
         if (emailError.code === 'EAUTH' || emailError.responseCode === 535) {
           console.error(
@@ -133,7 +135,7 @@ export default class EmailService implements IEmailService {
           emailError.code === 'ECONNRESET'
         ) {
           console.error(
-            '💡 Connection Error: This usually means wrong password or no App Password',
+            '💡 Connection Error: Possibly wrong password or missing App Password.',
           );
         }
       }
@@ -149,12 +151,12 @@ export default class EmailService implements IEmailService {
   async sendAdvancedEmail(
     options: AdvancedEmailOptions,
   ): Promise<IEmailResponse> {
+    console.log('📤 Attempting to send advanced email...', options);
+
     try {
       if (!this.isInitialized || !this.transporter) {
-        return {
-          success: false,
-          error: 'Email transporter not initialized',
-        };
+        console.warn('⚠️ Email transporter not initialized.');
+        return { success: false, error: 'Email transporter not initialized' };
       }
 
       const mailOptions = {
@@ -169,12 +171,12 @@ export default class EmailService implements IEmailService {
         replyTo: options.replyTo,
       };
 
-      const info = await this.transporter.sendMail(mailOptions);
+      console.log('📨 Sending advanced email with options:', mailOptions);
 
-      return {
-        success: true,
-        messageId: info?.messageId || 'unknown',
-      };
+      const info = await this.transporter.sendMail(mailOptions);
+      console.log('✅ Advanced email sent successfully:', info);
+
+      return { success: true, messageId: info?.messageId || 'unknown' };
     } catch (error: unknown) {
       console.error('❌ Error sending advanced email:', error);
 
@@ -184,6 +186,7 @@ export default class EmailService implements IEmailService {
           responseCode?: number;
           message?: string;
         };
+        console.warn('⚠️ Email error details:', emailError);
 
         if (emailError.code === 'EAUTH' || emailError.responseCode === 535) {
           console.error(
@@ -194,10 +197,11 @@ export default class EmailService implements IEmailService {
           emailError.code === 'ECONNRESET'
         ) {
           console.error(
-            '💡 Connection Error: This usually means wrong password or no App Password',
+            '💡 Connection Error: Possibly wrong password or missing App Password.',
           );
         }
       }
+
       return {
         success: false,
         error:
@@ -210,18 +214,23 @@ export default class EmailService implements IEmailService {
     template: string,
     data: Record<string, string>,
   ): string {
+    console.log('🧩 Replacing template variables...');
     let result = template;
     for (const [key, value] of Object.entries(data)) {
       const regex = new RegExp(`{{${key}}}`, 'g');
       result = result.replace(regex, value || '');
     }
+    console.log('✅ Template variables replaced.');
     return result;
   }
 
   private async loadHtmlTemplate(templatePath: string): Promise<string> {
     try {
+      console.log('📁 Loading HTML template from path:', templatePath);
       const fullPath = path.resolve(templatePath);
-      return await fs.promises.readFile(fullPath, 'utf-8');
+      const content = await fs.promises.readFile(fullPath, 'utf-8');
+      console.log('✅ Template loaded successfully.');
+      return content;
     } catch (error) {
       console.error('❌ Error loading HTML template:', error);
       throw new Error(`Failed to load template: ${templatePath}`);
@@ -232,51 +241,54 @@ export default class EmailService implements IEmailService {
     to: string,
     data: PatientInquiryEmailData,
   ): Promise<IEmailResponse> {
+    console.log(
+      '📬 Preparing to send patient inquiry email to:',
+      to,
+      'with data:',
+      data,
+    );
+
     try {
       if (!this.isInitialized || !this.transporter) {
-        return {
-          success: false,
-          error: 'Email transporter not initialized',
-        };
+        console.warn('⚠️ Email transporter not initialized.');
+        return { success: false, error: 'Email transporter not initialized' };
       }
 
-      // Load HTML template
       const templatePath = path.join(
         process.cwd(),
         'uploads/public/Nova_Voya_New_Patient_Inquiry_Email_Template.html',
       );
       const htmlTemplate = await this.loadHtmlTemplate(templatePath);
 
-      // Replace template variables
       const htmlContent = this.replaceTemplateVariables(
         htmlTemplate,
         data as unknown as Record<string, string>,
       );
 
-      // Prepare logo attachment
       const logoPath = path.join(process.cwd(), 'uploads/public/Logo.png');
       const mailOptions = {
-        from: `Nova Voya Support <${
-          process.env.GMAIL_USER || 'support@novavoya.com'
-        }>`,
-        to: to,
+        from: `Nova Voya Support <${process.env.GMAIL_USER || 'support@novavoya.com'}>`,
+        to,
         subject: `New Patient Inquiry for ${data.Deal_title} (Ref: ${data.short_id})`,
         html: htmlContent,
         attachments: [
           {
             filename: 'Logo.png',
             path: logoPath,
-            cid: 'Logo.png', // Content-ID for inline embedding
+            cid: 'Logo.png',
           },
         ],
       };
 
-      const info = await this.transporter.sendMail(mailOptions);
+      console.log(
+        '📨 Sending patient inquiry email with options:',
+        mailOptions,
+      );
 
-      return {
-        success: true,
-        messageId: info?.messageId || 'unknown',
-      };
+      const info = await this.transporter.sendMail(mailOptions);
+      console.log('✅ Patient inquiry email sent successfully:', info);
+
+      return { success: true, messageId: info?.messageId || 'unknown' };
     } catch (error: unknown) {
       console.error('❌ Error sending patient inquiry email:', error);
       return {
